@@ -1,0 +1,100 @@
+menu "Water level Configuration"
+
+    config WATER_LEVEL_BOARD_BUTTON_GPIO
+        int "Boot Button GPIO"
+        default 28 if IDF_TARGET_ESP32C5
+        default 9 if IDF_TARGET_ESP32C3 || IDF_TARGET_ESP32C6 || IDF_TARGET_ESP32C2 || IDF_TARGET_ESP32H2
+        default 0
+        help
+            GPIO number on which the "Boot" button is connected. This is generally used
+            by the application for custom operations like toggling states, resetting to defaults, etc.
+
+    config WATER_LEVEL_UPDATE_PERIOD_MINUTES
+        int "Update period (minutes)"
+        default 5
+        help
+            Update period for sensor acquisition and server publishing (minutes)
+
+    config WATER_LEVEL_ENABLE_PUSH_NOTIFICATION 
+        bool "Water level status notification"
+        default n
+        help
+            Enable this option to push app notifications. When enabled, the firmware will send notifications
+            to the mobile app based on the system status.
+
+    config WATER_LEVEL_TANK_HEIGHT_CM
+        int "Tank height"
+        default 35
+        help
+            Set the tank height for calibration. It can be configured using the mobile app.
+
+    config WATER_LEVEL_TANK_BASE_CM
+        int "Tank base (cm)"
+        default 13
+        help
+            Set the tank minimum height for calibration. Must be greater than WATER_LEVEL_TANK_HEIGHT_CM. 
+            It can be configured using the mobile app
+
+    config WATER_LEVEL_TANK_VOLUME_LTS
+        int "Tank volume"
+        default 500
+        help
+            Used to determine the capacity (0-100) (default 500L)
+
+    config WATER_LEVEL_FILTER_SAMPLE_PERIOD_S
+        int "Filter sample period"
+        default 15
+
+    config WATER_LEVEL_FILTER_WINDOW_MINUTES
+        int "Filter window sample (minutes)"
+        default 5
+
+    config WATER_LEVEL_SENSOR_TILT
+        int "Sensor tilt (degrees)"
+        default 45
+
+    config WATER_LEVEL_SENSOR_THRESHOLD_DEFAULT
+        int "Full capacity threshold (0-100)"
+        default 90
+
+    config WATER_LEVEL_LOW_THRESHOLD
+        int "Low capacity threshold"
+        default 40
+        help
+            Value in percentage that triggers a low level warning.
+
+    config WATER_LEVEL_CRITICAL_THRESHOLD
+        int "Critical capacity threshold"
+        default 30
+        help
+            Value in percentage that triggers a critical level warning. Must be less than LOW_LEVEL_THRESHOLD
+
+    config WATER_LEVEL_ENABLE_GPIO_LED_STATUS
+        bool "Turn on/off LED status"
+        default y
+        help
+            This option enables the status via GPIO LED.
+                1. Two rapid blinks means successfully acquired data from sensor
+                2. Intermittent slow flashing means water level below threshold
+                3. Intermittent rapid flashing means water level below critical capacity
+                4. Constant LED light means the water level has reached full capacity (above threshold)
+
+    config WATER_LEVEL_GPIO_LED
+        int "GPIO port for the status LED"
+        default 2
+        help
+            GPIO port for the status LED (default GPIO_NUM_2)
+
+    config WATER_LEVEL_GPIO_JSNSR04T_TRIGGER
+        int "GPIO port for the Trigger pin"
+        default 5
+        help
+            GPIO port for the Trigger pin of the JSNSR04T ultrasonic sensor (default GPIO_NUM_5)
+
+    config WATER_LEVEL_GPIO_JSNSR04T_ECHO
+        int "GPIO port for the Echo pin"
+        default 18
+        help
+            GPIO port for the Echo pin of the JSNSR04T ultrasonic sensor (default GPIO_NUM_18)
+
+endmenu

@@ -1,0 +1,10 @@
+dependencies:
+  espressif/esp_rainmaker: "*"
+  espressif/rmaker_app_reset:
+    version: '*'
+  espressif/rmaker_app_network:
+    version: '*'
+  espressif/rmaker_app_insights:
+    version: '*'
+  espressif/mqtt:
+    version: '*'

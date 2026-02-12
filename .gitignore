@@ -1,0 +1,7 @@
+Session.vim
+
+*.old
+*.bak
+
+managed_components/
+build/
