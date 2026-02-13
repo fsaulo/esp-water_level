@@ -90,3 +90,11 @@ Notes
 - Ensure the ultrasonic sensor is mounted perpendicular to the water surface.
 - Avoid condensation or obstructions inside the tank.
 - Large firmware sizes require appropriately sized OTA partitions.
+
+## Acknowledgements
+
+This project builds upon the following technologies and tools:
+
+[ESP-IDF](https://docs.espressif.com/projects/esp-idf/en/stable/esp32/index.html) — Official development framework for ESP32\
+[ESP RainMaker](https://docs.espressif.com/projects/esp-idf/en/stable/esp32/index.html) — Cloud connectivity and device management platform by Espressif\
+[JSN-SR04T Ultrasonic Sensor](https://github.com/pantaluna/esp32-mjd-starter-kit) — Waterproof ultrasonic distance sensor used for water level measurement
