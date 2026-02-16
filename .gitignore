@@ -2,6 +2,7 @@ Session.vim
 
 *.old
 *.bak
+*.log
 
 managed_components/
 build/
