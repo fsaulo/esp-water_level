@@ -677,9 +677,9 @@ static void ultrasonic_sensor_init(void)
     jsnsr04t_config.trigger_gpio_num = CONFIG_WATER_LEVEL_GPIO_JSNSR04T_TRIGGER;
     jsnsr04t_config.echo_gpio_num = CONFIG_WATER_LEVEL_GPIO_JSNSR04T_ECHO;
     jsnsr04t_config.rmt_channel = RMT_CHANNEL_0;
-    jsnsr04t_config.distance_sensor_to_artifact_cm = 10.0;
+    jsnsr04t_config.distance_sensor_to_artifact_cm = 0.0;
     jsnsr04t_config.nbr_of_samples = 10;
-    jsnsr04t_config.max_range_allowed_in_samples_cm = 10.0;
+    jsnsr04t_config.max_range_allowed_in_samples_cm = 15.0;
 
     esp_err_t f_retval = mjd_jsnsr04t_init(&jsnsr04t_config);
     if (f_retval != ESP_OK) {
