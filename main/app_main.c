@@ -133,7 +133,8 @@ static QueueHandle_t boot_evt_queue = NULL;
 static void (*boot_user_callback)(void) = NULL;
 static void sensor_update(void);
 static void sensor_publish(void);
-static double compute_tank_capacity(int dt);
+static double compute_tank_capacity(double value);
+static double sensor_get_average(void);
 
 static esp_timer_handle_t water_level_timer;
 static esp_timer_handle_t sensor_pub_timer;
@@ -162,7 +163,6 @@ typedef struct {
 static sensor_sample_t samples[MAX_SAMPLES];
 static int sample_count = 0;
 static int sample_head = 0;
-
 
 /* Event handler for catching RainMaker events */
 static void event_handler(void* arg, esp_event_base_t event_base,
@@ -322,9 +322,7 @@ static void led_update(void)
 
 static void update_sensor_status(sensor_status_t *sensor_status)
 {
-    int oldest = (sample_head - sample_count + MAX_SAMPLES) % MAX_SAMPLES;
-    int newest = (sample_head - 1 + MAX_SAMPLES) % MAX_SAMPLES;
-    double capacity = (compute_tank_capacity(newest) + compute_tank_capacity(oldest)) / 2;
+    double capacity = (compute_tank_capacity(sensor_get_average()));
 
     if (capacity < 0 || capacity > 100) {
         sensor_status->flags |= SENSOR_STATUS_CODE_CALIBRATION_REQUIRED;
@@ -523,6 +521,21 @@ sensor_status_t read_and_log_sensor(double* measurement)
     return status;
 }
 
+static double sensor_get_average(void)
+{
+    if (sample_count == 0) {
+        return 0.0;
+    }
+
+    double sum = 0.0;
+
+    for (size_t i = 0; i < sample_count; i++) {
+        sum += samples[i].value;
+    }
+
+    return sum / (double)sample_count;
+}
+
 static void sensor_store_sample(double distance)
 {
     samples[sample_head].timestamp_us = esp_timer_get_time();
@@ -533,6 +546,8 @@ static void sensor_store_sample(double distance)
     if (sample_count < MAX_SAMPLES) {
         sample_count++;
     }
+
+    ESP_LOGI("[sensor_raw]", "Stored samples count: %.2f", sample_count);
 }
 
 static inline double corrected_distance(double distance)
@@ -540,9 +555,8 @@ static inline double corrected_distance(double distance)
     return distance * cos(s_sensor_tilt * M_PI / 180.0);
 }
 
-static double compute_tank_capacity(int dt)
+static double compute_tank_capacity(double raw_distance)
 {
-    double raw_distance = samples[dt].value;
     double d = corrected_distance(raw_distance);
 
     // Clamp to physical limits
@@ -551,9 +565,13 @@ static double compute_tank_capacity(int dt)
     if (d < s_tank_base_cm)
         d = s_tank_base_cm;
 
+    ESP_LOGI(TAG, "[sensor_raw] Input raw: %.2f", raw_distance);
+    ESP_LOGI(TAG, "[sensor_raw] Corrected distance: %.2f", d);
+
     double usable_height = s_max_tank_height_cm - s_tank_base_cm;
     double water_level = d - s_tank_base_cm;
 
+    ESP_LOGI(TAG, "[sensor_raw] Water level: %.2f", water_level);
     if (usable_height == 0.0) {
         return -1;
     }
@@ -564,7 +582,7 @@ static double compute_tank_capacity(int dt)
 
 static double compute_tank_volume(int dt)
 {
-    return (compute_tank_capacity(dt) / 100.0f) * s_max_tank_volume;
+    return (compute_tank_capacity(samples[dt].value) / 100.0f) * s_max_tank_volume;
 }
 
 static float compute_flow(void)
@@ -607,15 +625,15 @@ static void sensor_publish(void)
     int dt1 = (sample_head - sample_count + MAX_SAMPLES) % MAX_SAMPLES;
     int dt2 = (sample_head - 1 + MAX_SAMPLES) % MAX_SAMPLES;
 
-    double capacity_avg = (compute_tank_capacity(dt2) + compute_tank_capacity(dt1)) / 2.0f;
-    esp_rmaker_param_update_and_report(
-        water_tank_capacity_param,
-        esp_rmaker_int((int)capacity_avg));
-
-    double distance = samples[dt2].value;
+    double distance = sensor_get_average();
     esp_rmaker_param_update_and_report(
         water_tank_sensor_raw_param,
         esp_rmaker_float(distance));
+
+    double capacity_avg = (compute_tank_capacity(distance));
+    esp_rmaker_param_update_and_report(
+        water_tank_capacity_param,
+        esp_rmaker_int((int)capacity_avg));
 
     double volume_avg = (compute_tank_volume(dt2) + compute_tank_volume(dt1)) / 2.0f;
     esp_rmaker_param_update_and_report(
@@ -911,7 +929,7 @@ void app_main()
     app_insights_enable();
 
     esp_rmaker_start();
-
+   
     err = app_network_set_custom_mfg_data(MGF_DATA_DEVICE_TYPE_SWITCH, MFG_DATA_DEVICE_SUBTYPE_SWITCH);
     err = app_network_start(POP_TYPE_RANDOM);
     if (err != ESP_OK) {
