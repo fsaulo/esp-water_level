@@ -18,7 +18,7 @@ static const char TAG[] = "jsnsr04t";
 /*
  * Sensor settings
  */
-#define MJD_JSNSR04T_MINIMUM_SUPPORTED_DISTANCE_CM         (22.0)
+#define MJD_JSNSR04T_MINIMUM_SUPPORTED_DISTANCE_CM         (21.0)
 #define MJD_JSNSR04T_MAXIMUM_SUPPORTED_DISTANCE_CM         (600.0)
 // Spinlock for protecting concurrent register-level access
 static portMUX_TYPE jsnsr04t_spinlock = portMUX_INITIALIZER_UNLOCKED;
