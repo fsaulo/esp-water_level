@@ -609,10 +609,21 @@ static void sensor_update()
     double value = g_latest_measurement;
     sensor_status_t status = read_and_log_sensor(&value);
 
+    double normalized = corrected_distance(value);
+    if (normalized > s_max_tank_height_cm) {
+        // We're assuming that the tank volume is at full capacity, even though 
+        // that might not be always true.  The sensor range may not cover the 
+        // tank dimensions depending on how it was installed.
+        status.main_status = SENSOR_STATUS_CODE_FULL_CAPACITY;
+        ESP_LOGE(TAG, "[sensor_driver] Sensor measurement out of calibration ranges: %2.f cm", value);
+        goto update;
+    }
+
     if (status.main_status == SENSOR_STATUS_CODE_OPERATIONAL) {
         g_latest_measurement = value;
     }
 
+update:
     sensor_store_sample(value);
     update_sensor_status(&status);
 
@@ -696,8 +707,8 @@ static void ultrasonic_sensor_init(void)
     jsnsr04t_config.echo_gpio_num = CONFIG_WATER_LEVEL_GPIO_JSNSR04T_ECHO;
     jsnsr04t_config.rmt_channel = RMT_CHANNEL_0;
     jsnsr04t_config.distance_sensor_to_artifact_cm = 0.0;
-    jsnsr04t_config.nbr_of_samples = 10;
-    jsnsr04t_config.max_range_allowed_in_samples_cm = 15.0;
+    jsnsr04t_config.nbr_of_samples = 15;
+    jsnsr04t_config.max_range_allowed_in_samples_cm = 5.0;
 
     esp_err_t f_retval = mjd_jsnsr04t_init(&jsnsr04t_config);
     if (f_retval != ESP_OK) {
