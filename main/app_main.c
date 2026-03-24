@@ -624,11 +624,11 @@ static void sensor_update()
     }
 
 update:
-    sensor_store_sample(value);
+    sensor_store_sample(g_latest_measurement);
     update_sensor_status(&status);
 
     ESP_LOGI(TAG, "[sensor_driver] Sensor update: %.2f cm (status=%d)",
-             value, status.main_status);
+             g_latest_measurement, status.main_status);
 }
 
 static void sensor_publish(void)
