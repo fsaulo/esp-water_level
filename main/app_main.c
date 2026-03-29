@@ -547,7 +547,12 @@ static void sensor_store_sample(double distance)
         sample_count++;
     }
 
-    ESP_LOGI("[sensor_raw]", "Stored samples count: %.2f", sample_count);
+    ESP_LOGI("[sensor_raw]", "Stored samples count: %d", sample_count);
+}
+
+static uint32_t get_last_sample_stamp(void)
+{
+    return samples[sample_head].timestamp_us;
 }
 
 static inline double corrected_distance(double distance)
@@ -616,6 +621,17 @@ static void sensor_update()
         // tank dimensions depending on how it was installed.
         status.main_status = SENSOR_STATUS_CODE_FULL_CAPACITY;
         ESP_LOGE(TAG, "[sensor_driver] Sensor measurement out of calibration ranges: %2.f cm", value);
+        goto update;
+    }
+
+    bool is_old_sample = abs(get_last_sample_stamp() - esp_timer_get_time()) > 10U * 60U * 1000000U;
+    if (value >= 2*g_latest_measurement && !is_old_sample) {
+        // The sensor’s sound waves can sometimes ricochet off the tank walls,
+        // producing valid readings that are much larger than the actual distance.
+        // Here, we attempt to filter these out by rejecting large fluctuations,
+        // unless they persist over a prolonged period.
+        status.main_status = SENSOR_STATUS_CODE_ERROR;
+        ESP_LOGE(TAG, "[sensor_driver] Inconsistent sensor measurement, skipping value %2.f cm", value);
         goto update;
     }
 
