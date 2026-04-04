@@ -6,7 +6,7 @@ Description
 
 This project implements a residential water level monitoring system using ESP RainMaker on the ESP32 platform. The system measures the water level of a storage tank using a JSN-SR04T ultrasonic sensor and reports the data to the cloud via ESP RainMaker.
 
-The firmware is designed for the ESP32 and has been tested on the ESP32-WROOM-32 DevKit v4 development board.
+The firmware is designed for the ESP32 and has been tested on the ESP32-WROOM-32 DevKit v2 development board.
 
 The system enables remote monitoring of tank level percentage, distance measurement, and device status through the ESP RainMaker mobile application.
 
@@ -17,7 +17,7 @@ Target MCU:
 - ESP32
 
 Tested Board:
-- ESP32-WROOM-32 DevKit v4
+- ESP32-WROOM-32 DevKit v2
 
 Sensor:
 - JSN-SR04T waterproof ultrasonic distance sensor
