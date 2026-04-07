@@ -625,7 +625,7 @@ static void sensor_update()
     }
 
     bool is_old_sample = abs(get_last_sample_stamp() - esp_timer_get_time()) > 10U * 60U * 1000000U;
-    if (value >= 2*g_latest_measurement && !is_old_sample) {
+    if (value >= 2*g_latest_measurement && !is_old_sample && sample_count > 0) {
         // The sensor’s sound waves can sometimes ricochet off the tank walls,
         // producing valid readings that are much larger than the actual distance.
         // Here, we attempt to filter these out by rejecting large fluctuations,
