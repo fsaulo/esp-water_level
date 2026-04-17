@@ -11,9 +11,10 @@ menu "Water level Configuration"
 
     config WATER_LEVEL_UPDATE_PERIOD_MINUTES
         int "Update period (minutes)"
-        default 5
+        default 10
         help
-            Update period for sensor acquisition and server publishing (minutes)
+            Update period for sensor cloud server publishing (minutes)
+            The sensor acquisition thread ticks 100 times faster.
 
     config WATER_LEVEL_ENABLE_PUSH_NOTIFICATION 
         bool "Water level status notification"
@@ -23,7 +24,7 @@ menu "Water level Configuration"
             to the mobile app based on the system status.
 
     config WATER_LEVEL_TANK_HEIGHT_CM
-        int "Tank height"
+        int "Tank height (cm)"
         default 35
         help
             Set the tank height for calibration. It can be configured using the mobile app.
@@ -36,13 +37,13 @@ menu "Water level Configuration"
             It can be configured using the mobile app
 
     config WATER_LEVEL_TANK_VOLUME_LTS
-        int "Tank volume"
+        int "Tank volume (L)"
         default 500
         help
             Used to determine the capacity (0-100) (default 500L)
 
     config WATER_LEVEL_FILTER_SAMPLE_PERIOD_S
-        int "Filter sample period"
+        int "Filter sample period (seconds)"
         default 15
 
     config WATER_LEVEL_FILTER_WINDOW_MINUTES
