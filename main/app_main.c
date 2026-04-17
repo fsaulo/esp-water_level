@@ -938,7 +938,7 @@ void app_main()
 
     uint32_t thread_period_m = CONFIG_WATER_LEVEL_UPDATE_PERIOD_MINUTES;
     uint64_t thread_period_us = (uint64_t)thread_period_m * 60ULL * 1000000ULL;
-    uint64_t thread_update_us = (uint64_t)((CONFIG_WATER_LEVEL_UPDATE_PERIOD_MINUTES * 60ULL) / 10 * 1000000ULL);
+    uint64_t thread_update_us = (uint64_t)((CONFIG_WATER_LEVEL_UPDATE_PERIOD_MINUTES * 60ULL) / 100 * 1000000ULL);
 
     boot_button_init(on_button_pressed);
 
