@@ -51,6 +51,7 @@
 
 #define ESP_RMAKER_DEVICE_WATER_TANK_SENSOR "esp.device.water_sensor"
 #define ESP_RMAKER_DEVICE_WATER_TANK_SENSOR_RAW "esp.device.water_sensor_raw"
+#define ESP_RMAKER_DEVICE_WATER_TANK_SENSOR_FILTERED "esp.define.water_sensor_filtered"
 #define ESP_RMAKER_DEVICE_WATER_TANK_SENSOR_VOLUME "esp.device.water_tank_volume"
 #define ESP_RMAKER_DEVICE_WATER_TANK_SENSOR_FLOW_RATE "esp.device.flow_rate"
 #define ESP_RMAKER_DEVICE_WATER_TANK_CAPACITY "esp.device.tank_capacity"
@@ -145,11 +146,12 @@ static esp_rmaker_param_t *calib_tank_volume_param;
 static esp_rmaker_param_t *calib_sensor_ang_deg_param;
 static esp_rmaker_param_t *water_tank_volume_param;
 static esp_rmaker_param_t *water_tank_sensor_raw_param;
+static esp_rmaker_param_t *water_tank_sensor_filtered_param;
 static esp_rmaker_param_t *water_tank_capacity_param;
 static esp_rmaker_param_t *flow_rate_param;
-static esp_rmaker_device_t *water_tank_level_device;
 static esp_rmaker_param_t *sensor_status_msg_param;
 static esp_rmaker_param_t *sensor_status_int_param;
+static esp_rmaker_device_t *water_tank_level_device;
 
 mjd_jsnsr04t_config_t jsnsr04t_config;
 
@@ -655,6 +657,10 @@ static void sensor_publish(void)
     double distance = sensor_get_average();
     esp_rmaker_param_update_and_report(
         water_tank_sensor_raw_param,
+        esp_rmaker_float(g_latest_measurement));
+
+    esp_rmaker_param_update_and_report(
+        water_tank_sensor_filtered_param,
         esp_rmaker_float(distance));
 
     double capacity_avg = (compute_tank_capacity(distance));
@@ -834,6 +840,12 @@ void app_main()
         esp_rmaker_float(0),
         PROP_FLAG_READ | PROP_FLAG_PERSIST | PROP_FLAG_TIME_SERIES);
 
+    water_tank_sensor_filtered_param = esp_rmaker_param_create(
+        "Sensor filtered (cm)",
+        ESP_RMAKER_DEVICE_WATER_TANK_SENSOR_FILTERED,
+        esp_rmaker_float(0),
+        PROP_FLAG_READ | PROP_FLAG_PERSIST | PROP_FLAG_TIME_SERIES);
+
     level_param = esp_rmaker_param_create(
         "Full capacity adjust",
         ESP_RMAKER_DEVICE_WATER_TANK_CONFIG_LEVEL,
@@ -891,6 +903,7 @@ void app_main()
     esp_rmaker_param_add_ui_type( level_param, ESP_RMAKER_UI_SLIDER);
     esp_rmaker_param_add_ui_type( water_tank_capacity_param, ESP_RMAKER_UI_TEXT );
     esp_rmaker_param_add_ui_type( water_tank_sensor_raw_param, ESP_RMAKER_UI_TEXT );
+    esp_rmaker_param_add_ui_type( water_tank_sensor_filtered_param, ESP_RMAKER_UI_TEXT );
     esp_rmaker_param_add_ui_type( water_tank_volume_param, ESP_RMAKER_UI_TEXT );
     esp_rmaker_param_add_ui_type( calib_tank_height_param, ESP_RMAKER_UI_TEXT );
     esp_rmaker_param_add_ui_type( calib_tank_base_param, ESP_RMAKER_UI_TEXT );
@@ -938,6 +951,7 @@ void app_main()
     esp_rmaker_device_add_param(water_tank_level_device, water_tank_capacity_param);
     esp_rmaker_device_add_param(water_tank_level_device, water_tank_volume_param);
     esp_rmaker_device_add_param(water_tank_level_device, water_tank_sensor_raw_param);
+    esp_rmaker_device_add_param(water_tank_level_device, water_tank_sensor_filtered_param);
     esp_rmaker_device_add_param(water_tank_level_device, flow_rate_param);
     esp_rmaker_device_add_param(water_tank_level_device, calib_tank_height_param);
     esp_rmaker_device_add_param(water_tank_level_device, calib_tank_base_param);
