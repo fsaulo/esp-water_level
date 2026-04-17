@@ -575,6 +575,12 @@ static double compute_tank_capacity(double raw_distance)
     ESP_LOGI(TAG, "[sensor_raw] Input raw: %.2f", raw_distance);
     ESP_LOGI(TAG, "[sensor_raw] Corrected distance: %.2f", d);
 
+    /*
+     * Tank is full when the distance measured by the sensor is equal to the
+     * base of the tank. Similarly, the tank is empty when the sensor reports the 
+     * height of the tank plus its base.
+     *      full  -> sensor == tank_base
+     *      empty -> sensor == tank_height + tank_base */
     double usable_height = s_max_tank_height_cm - s_tank_base_cm;
     double water_level = d - s_tank_base_cm;
 
