@@ -478,7 +478,7 @@ static void led_driver_init(void)
 }
 #endif
 
-float smooth_level(float level_cm)
+static float smooth_level(float level_cm)
 {
     const float alpha = 0.2f;  // 0..1 (lower == smoother)
 
@@ -516,7 +516,7 @@ sensor_status_t read_and_log_sensor(double* measurement)
 #ifdef CONFIG_WATER_LEVEL_ENABLE_GPIO_LED_STATUS
         led_success_blink();
 #endif
-        *measurement = smooth_level(jsnsr04t_data.distance_cm);
+        *measurement = jsnsr04t_data.distance_cm;
     }
 
     ESP_ERROR_CHECK(mjd_jsnsr04t_log_data(jsnsr04t_data));
@@ -540,11 +540,13 @@ static double sensor_get_average(void)
 
 static void sensor_store_sample(double distance)
 {
+    // Apply a low pass filter before storing the sample
+    distance = smooth_level(distance);
+
     samples[sample_head].timestamp_us = esp_timer_get_time();
     samples[sample_head].value = distance;
 
     sample_head = (sample_head + 1) % MAX_SAMPLES;
-
     if (sample_count < MAX_SAMPLES) {
         sample_count++;
     }
@@ -648,10 +650,10 @@ static void sensor_update()
     }
 
 update:
-    sensor_store_sample(g_latest_measurement);
+    sensor_store_sample(value);
     update_sensor_status(&status);
 
-    ESP_LOGI(TAG, "[sensor_driver] Sensor update: %.2f cm (status=%d)",
+    ESP_LOGI(TAG, "[sensor_driver] Sensor raw update: %.2f cm (status=%d)",
              g_latest_measurement, status.main_status);
 }
 
@@ -660,11 +662,11 @@ static void sensor_publish(void)
     int dt1 = (sample_head - sample_count + MAX_SAMPLES) % MAX_SAMPLES;
     int dt2 = (sample_head - 1 + MAX_SAMPLES) % MAX_SAMPLES;
 
-    double distance = sensor_get_average();
     esp_rmaker_param_update_and_report(
         water_tank_sensor_raw_param,
         esp_rmaker_float(g_latest_measurement));
 
+    double distance = sensor_get_average();
     esp_rmaker_param_update_and_report(
         water_tank_sensor_filtered_param,
         esp_rmaker_float(distance));
