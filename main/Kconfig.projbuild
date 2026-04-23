@@ -50,6 +50,12 @@ menu "Water level Configuration"
         int "Filter window sample (minutes)"
         default 5
 
+    config WATER_LEVEL_FILTER_ALPHA
+        int "Filter alpha coefficient for the low-pass filter (0-100)"
+        default 20
+        help
+            Lower values generate a smoother output
+
     config WATER_LEVEL_SENSOR_TILT
         int "Sensor tilt (degrees)"
         default 45

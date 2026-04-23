@@ -85,6 +85,7 @@ static uint16_t s_sensor_tilt =         CONFIG_WATER_LEVEL_SENSOR_TILT;
 static uint16_t s_low_level =           CONFIG_WATER_LEVEL_LOW_THRESHOLD;
 static uint16_t s_critical_level =      CONFIG_WATER_LEVEL_CRITICAL_THRESHOLD;
 static uint16_t s_tank_base_cm =        CONFIG_WATER_LEVEL_TANK_BASE_CM;
+static uint16_t s_filter_alpha =        CONFIG_WATER_LEVEL_FILTER_ALPHA;
 
 static float flow_rate_lpm = 0.0f;
 static float level_ema = 0.0f;
@@ -480,7 +481,7 @@ static void led_driver_init(void)
 
 static float smooth_level(float level_cm)
 {
-    const float alpha = 0.2f;  // 0..1 (lower == smoother)
+    const float alpha = (float)s_filter_alpha / 100.0;  // 0..1 (lower == smoother)
 
     if (!level_ema_init) {
         level_ema = level_cm;
