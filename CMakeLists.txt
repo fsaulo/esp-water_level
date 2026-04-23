@@ -6,6 +6,6 @@ if(DEFINED ENV{RMAKER_PATH})
     set(RMAKER_PATH $ENV{RMAKER_PATH})
 endif(DEFINED ENV{RMAKER_PATH})
 
-set(PROJECT_VER "0.1.2")
+set(PROJECT_VER "0.1.3")
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 project(water_level)
